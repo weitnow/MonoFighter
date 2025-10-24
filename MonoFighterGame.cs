@@ -15,6 +15,9 @@ public class MonoFighterGame : Game
     private SpriteFont _debugFont;
     private OverlayRenderer _overlayRenderer;
 
+    private Texture2D _pixel;
+
+
     private int _currentResolutionIndex = 0;
 
     public MonoFighterGame()
@@ -44,6 +47,10 @@ public class MonoFighterGame : Game
         _debugFont = Globals.Content.Load<SpriteFont>("Fonts/DebugFont");
         _overlayRenderer = new OverlayRenderer("Graphics/overlay", new Rectangle(145, 25, 209, 155));
 
+        // Reusable 1x1 white texture
+        _pixel = new Texture2D(GraphicsDevice, 1, 1);
+        _pixel.SetData(new[] { Color.White });
+
         _gameRenderTarget = new RenderTarget2D(
             GraphicsDevice,
             Globals.VirtualResolution.X,
@@ -70,54 +77,44 @@ public class MonoFighterGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        // 1. Render the game scene to the offscreen target
-        Globals.GraphicsDevice.SetRenderTarget(_gameRenderTarget);
-        Globals.GraphicsDevice.Clear(Color.CornflowerBlue);
+        // 1. Render everything to the game render target
+        GraphicsDevice.SetRenderTarget(_gameRenderTarget);
+        GraphicsDevice.Clear(Color.CornflowerBlue);
         _gameManager.Draw();
-        Globals.GraphicsDevice.SetRenderTarget(null);
+        GraphicsDevice.SetRenderTarget(null);
 
-        // 2. Render final composition to screen
-        Globals.GraphicsDevice.Clear(Color.Black);
-
-        Globals.SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        // 2. Prepare main screen
+        GraphicsDevice.Clear(Color.Black);
+        Globals.SpriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.AlphaBlend);
 
         if (!Globals.DebugDraw)
         {
-            // Normal game rendering with overlay
+            // Normal mode — draw with overlay renderer
             _overlayRenderer.Draw(Globals.SpriteBatch, _gameRenderTarget);
         }
         else
         {
-            // Debug mode: draw scaled render target (half screen width)
+            // --- Debug mode layout ---
+            int screenWidth = GraphicsDevice.Viewport.Width;
+            int screenHeight = GraphicsDevice.Viewport.Height;
+            int halfWidth = screenWidth / 2;
 
-            var windowWidth = Globals.WindowSize.X;
-            var windowHeight = Globals.WindowSize.Y;
-
-            // Half width of window
-            float targetWidth = windowWidth / 2f;
-
-            // Maintain aspect ratio of render target
             float aspect = (float)_gameRenderTarget.Height / _gameRenderTarget.Width;
-            float targetHeight = targetWidth * aspect;
+            int gameViewHeight = (int)(halfWidth * aspect);
 
-            // Destination rectangle: top-left corner
-            Rectangle destRect = new Rectangle(
-                x: 0,
-                y: 0,
-                width: (int)targetWidth,
-                height: (int)targetHeight
-            );
+            // Left side: scaled render target
+            Rectangle gameViewRect = new(0, 0, halfWidth, gameViewHeight);
+            Globals.SpriteBatch.Draw(_gameRenderTarget, gameViewRect, Color.White);
 
-            // Draw scaled render target
-            Globals.SpriteBatch.Draw(_gameRenderTarget, destRect, Color.White);
+            // Overlay hitboxes/hurtboxes on top of game view
+            DrawBoxesOverlay(gameViewRect);
+
+            // Right side: debug panel area
+            Rectangle debugPanelRect = new(halfWidth, 0, halfWidth, screenHeight);
+            DrawDebugPanel(gameTime, debugPanelRect);
         }
 
         Globals.SpriteBatch.End();
-
-        // 3. Optional: draw debug overlay (later will occupy the right half)
-        if (Globals.DebugDraw)
-            DrawDebugOverlay(gameTime);
-
         base.Draw(gameTime);
     }
 
@@ -205,25 +202,61 @@ public class MonoFighterGame : Game
 
     #region === Debug Overlay ===
 
-    private void DrawDebugOverlay(GameTime gameTime)
+    private void DrawDebugPanel(GameTime gameTime, Rectangle debugRect)
     {
-        Globals.SpriteBatch.Begin(samplerState: SamplerState.LinearClamp, blendState: BlendState.AlphaBlend);
-        Globals.SpriteBatch.DrawString(_debugFont, $"FPS: {(1 / gameTime.ElapsedGameTime.TotalSeconds):0}", new Vector2(10, 10), Color.Yellow);
-        DrawDebugBox(new Rectangle(50, 50, 20, 30), Color.Red);
-        DrawDebugBox(new Rectangle(100, 60, 16, 40), Color.Lime);
-        Globals.SpriteBatch.End();
+        // Dim background behind debug text
+        Globals.SpriteBatch.Draw(_pixel, debugRect, Color.LightBlue * 0.5f);
+
+        Vector2 textPos = new(debugRect.X + 20, 20);
+        float fps = (float)(1 / gameTime.ElapsedGameTime.TotalSeconds);
+
+        Globals.SpriteBatch.DrawString(_debugFont, $"FPS: {fps:0}", textPos, Color.Yellow);
+        textPos.Y += 30;
+
+        Globals.SpriteBatch.DrawString(_debugFont, "=== Debug Info ===", textPos, Color.Cyan);
+        textPos.Y += 25;
+        Globals.SpriteBatch.DrawString(_debugFont, "Player State: Idle", textPos, Color.Lime);
+        textPos.Y += 25;
+        Globals.SpriteBatch.DrawString(_debugFont, "Hitboxes: 2", textPos, Color.Orange);
+        textPos.Y += 25;
+        Globals.SpriteBatch.DrawString(_debugFont, "Hurtboxes: 3", textPos, Color.Red);
+    }
+
+    private void DrawBoxesOverlay(Rectangle gameViewRect)
+    {
+        // Simulated boxes in game coordinates
+        Rectangle hitBox = new(0, 0, 5, 5);
+        Rectangle hurtBox = new(100, 80, 30, 40);
+
+        float scaleX = (float)gameViewRect.Width / _gameRenderTarget.Width;
+        float scaleY = (float)gameViewRect.Height / _gameRenderTarget.Height;
+
+        Rectangle hitScreen = TransformRect(hitBox, scaleX, scaleY, gameViewRect.Location);
+        Rectangle hurtScreen = TransformRect(hurtBox, scaleX, scaleY, gameViewRect.Location);
+
+        DrawDebugBox(hitScreen, Color.Red);
+        DrawDebugBox(hurtScreen, Color.Lime);
+    }
+
+    private Rectangle TransformRect(Rectangle rect, float scaleX, float scaleY, Point offset)
+    {
+        return new Rectangle(
+            offset.X + (int)(rect.X * scaleX),
+            offset.Y + (int)(rect.Y * scaleY),
+            (int)(rect.Width * scaleX),
+            (int)(rect.Height * scaleY));
     }
 
     private void DrawDebugBox(Rectangle rect, Color color)
     {
-        using var pixel = new Texture2D(GraphicsDevice, 1, 1);
-        pixel.SetData(new[] { Color.White });
-
-        Globals.SpriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), color);
-        Globals.SpriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Bottom, rect.Width, 1), color);
-        Globals.SpriteBatch.Draw(pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), color);
-        Globals.SpriteBatch.Draw(pixel, new Rectangle(rect.Right, rect.Top, 1, rect.Height), color);
+        Globals.SpriteBatch.Draw(_pixel, new Rectangle(rect.Left, rect.Top, rect.Width, 1), color);     // Top
+        Globals.SpriteBatch.Draw(_pixel, new Rectangle(rect.Left, rect.Bottom, rect.Width, 1), color);  // Bottom
+        Globals.SpriteBatch.Draw(_pixel, new Rectangle(rect.Left, rect.Top, 1, rect.Height), color);    // Left
+        Globals.SpriteBatch.Draw(_pixel, new Rectangle(rect.Right, rect.Top, 1, rect.Height), color);   // Right
     }
+
+
+
 
     #endregion
 }
