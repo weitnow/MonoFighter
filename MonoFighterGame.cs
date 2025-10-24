@@ -70,19 +70,51 @@ public class MonoFighterGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        // 1. Render game scene to offscreen target
+        // 1. Render the game scene to the offscreen target
         Globals.GraphicsDevice.SetRenderTarget(_gameRenderTarget);
         Globals.GraphicsDevice.Clear(Color.CornflowerBlue);
         _gameManager.Draw();
         Globals.GraphicsDevice.SetRenderTarget(null);
 
-        // 2. Render final composition
+        // 2. Render final composition to screen
         Globals.GraphicsDevice.Clear(Color.Black);
 
         Globals.SpriteBatch.Begin(samplerState: SamplerState.PointClamp);
-        _overlayRenderer.Draw(Globals.SpriteBatch, _gameRenderTarget);
+
+        if (!Globals.DebugDraw)
+        {
+            // Normal game rendering with overlay
+            _overlayRenderer.Draw(Globals.SpriteBatch, _gameRenderTarget);
+        }
+        else
+        {
+            // Debug mode: draw scaled render target (half screen width)
+
+            var windowWidth = Globals.WindowSize.X;
+            var windowHeight = Globals.WindowSize.Y;
+
+            // Half width of window
+            float targetWidth = windowWidth / 2f;
+
+            // Maintain aspect ratio of render target
+            float aspect = (float)_gameRenderTarget.Height / _gameRenderTarget.Width;
+            float targetHeight = targetWidth * aspect;
+
+            // Destination rectangle: top-left corner
+            Rectangle destRect = new Rectangle(
+                x: 0,
+                y: 0,
+                width: (int)targetWidth,
+                height: (int)targetHeight
+            );
+
+            // Draw scaled render target
+            Globals.SpriteBatch.Draw(_gameRenderTarget, destRect, Color.White);
+        }
+
         Globals.SpriteBatch.End();
 
+        // 3. Optional: draw debug overlay (later will occupy the right half)
         if (Globals.DebugDraw)
             DrawDebugOverlay(gameTime);
 
