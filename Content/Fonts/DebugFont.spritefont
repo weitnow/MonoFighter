@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XnaContent xmlns:Graphics="Microsoft.Xna.Framework.Content.Pipeline.Graphics">
+  <Asset Type="Graphics:FontDescription">
+
+    <!-- System font to use -->
+    <FontName>DejaVu Sans Mono</FontName>
+
+    <!-- Font size in points -->
+    <Size>8</Size>
+
+    <!-- Style: Regular, Bold, Italic, etc. -->
+    <Spacing>0</Spacing>
+    <Style>Regular</Style>
+
+    <!-- Character region (ASCII printable characters) -->
+    <CharacterRegions>
+      <CharacterRegion>
+        <Start> </Start>
+        <End>~</End>
+      </CharacterRegion>
+    </CharacterRegions>
+
+  </Asset>
+</XnaContent>
