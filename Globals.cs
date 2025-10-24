@@ -4,45 +4,39 @@ namespace MonoFighter;
 
 public static class Globals
 {
-    public static float Time { get; private set; }
+    // Configuration constants
+    public static readonly Point VirtualResolution = new(209, 155);
+
+    // Runtime systems
     public static ContentManager Content { get; set; }
     public static SpriteBatch SpriteBatch { get; set; }
     public static GraphicsDevice GraphicsDevice { get; set; }
     public static Point WindowSize { get; set; } = new(1920, 1080);
-
-    public static Point VirtualResolution { get; } = new(256, 144);
-
     public static bool DebugDraw { get; set; } = true;
 
+    // Timing
+    public static float DeltaTime { get; private set; }
+    public static double TotalTime { get; private set; }
 
-
-    public static void Update(GameTime gt)
+    public static void Update(GameTime gameTime)
     {
-        Time = (float)gt.ElapsedGameTime.TotalSeconds;
+        DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+        TotalTime += DeltaTime;
     }
+
+    public enum ResolutionPreset
+    {
+        R_640x480,
+        R_800x600,
+        R_1280x720,
+        R_1920x1080,
+        R_2560x1440,
+        R_3440x1440,
+        R_3840x2160
+    }
+
 }
 
-/*
-Common Window Sizes:
-Auto
-3480 x 2160
-2560 x 1440
-1920 x 1080
-1280 x 720
-800 x 600
-640 x 480
 
 
 
-
-    R_256x144,   // orginal resolution 16:9
-    R_512x288,   // x2
-    R_768x432,   // x3
-    R_1024x576,  // x4
-    R_1120x630,  // DEBUG_DRAW
-    R_1280x720,  // x5
-    R_1536x864,  // x6
-    R_1792x1008, // x7
-    R_2560x1440  // x10
-
-*/
