@@ -7,8 +7,8 @@ public class DebugManager
     public int Hitboxes { get; set; } = 0;
     public int Hurtboxes { get; set; } = 0;
 
-    public void Draw(DebugRenderer renderer, SpriteBatch spriteBatch, GameTime gameTime, Rectangle panelRect)
+    public void Draw(DebugRenderer renderer, GameTime gameTime)
     {
-        renderer.DrawPanel(spriteBatch, panelRect, gameTime);
+        renderer.DrawPanel(gameTime);
     }
 }

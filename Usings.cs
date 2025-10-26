@@ -6,3 +6,5 @@ global using Microsoft.Xna.Framework.Input;
 global using AsepriteDotNet.Aseprite;
 global using AsepriteDotNet.IO;
 global using MonoGame.Aseprite;
+
+global using MonoGame.Extended;

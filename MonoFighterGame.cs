@@ -14,16 +14,9 @@ public class MonoFighterGame : Game
     private GameManager _gameManager;
 
     private RenderTarget2D _gameRenderTarget;
-    private SpriteFont _debugFont;
     private GbOverlayRenderer _overlayRenderer;
 
     private DebugRenderer _debugRenderer;
-
-    private DebugManager _debugManager;
-
-
-
-    private Texture2D _pixel;
 
 
     private int _currentResolutionIndex = 0;
@@ -35,12 +28,12 @@ public class MonoFighterGame : Game
         IsMouseVisible = true;
     }
 
-    #region === MonoGame Lifecycle ===
 
     protected override void Initialize()
     {
         SetupInitialGraphics();
         _gameManager = new();
+
 
         base.Initialize();
     }
@@ -51,13 +44,9 @@ public class MonoFighterGame : Game
         Globals.Content = Content;
         Globals.GraphicsDevice = GraphicsDevice;
         Globals.SpriteBatch = new SpriteBatch(GraphicsDevice);
+        Globals.DebugManager = new DebugManager();
 
-        _debugFont = Globals.Content.Load<SpriteFont>("Fonts/DebugFont");
-        _overlayRenderer = new GbOverlayRenderer("Graphics/overlay", new Rectangle(145, 25, 209, 155));
-
-        // Reusable 1x1 white texture
-        _pixel = new Texture2D(GraphicsDevice, 1, 1);
-        _pixel.SetData(new[] { Color.White });
+        _overlayRenderer = new GbOverlayRenderer("Graphics/overlay", new Rectangle(145, 25, 209, 155)); // first two params x/y of the first top right pixel of the screen area, second two parameters with and height of the screen area
 
         _gameRenderTarget = new RenderTarget2D(
             GraphicsDevice,
@@ -69,8 +58,8 @@ public class MonoFighterGame : Game
             0,
             RenderTargetUsage.DiscardContents);
 
-        _debugRenderer = new DebugRenderer(GraphicsDevice, _debugFont);
-        _debugManager = new DebugManager();
+
+        _debugRenderer = new(); // need to be after Content and GraphicsDevice are set
 
         _gameManager.ChangeScene(new TestScene());
     }
@@ -107,28 +96,25 @@ public class MonoFighterGame : Game
         {
 
             // === Debug mode layout ===
-            int screenWidth = GraphicsDevice.Viewport.Width;
-            int screenHeight = GraphicsDevice.Viewport.Height;
-            int halfWidth = screenWidth / 2;
+
+            int halfWidth = Globals.WindowSize.X / 2;
 
             float aspect = (float)_gameRenderTarget.Height / _gameRenderTarget.Width;
             int gameViewHeight = (int)(halfWidth * aspect);
 
             Rectangle gameViewRect = new(0, 0, halfWidth, gameViewHeight);
             Globals.SpriteBatch.Draw(_gameRenderTarget, gameViewRect, Color.White);
-            _debugRenderer.DrawBoxes(Globals.SpriteBatch, gameViewRect, _gameRenderTarget);
+            _debugRenderer.DrawBoxes(gameViewRect, _gameRenderTarget);
 
-            Rectangle panelRect = new(halfWidth, 0, halfWidth, screenHeight);
-            _debugManager.Draw(_debugRenderer, Globals.SpriteBatch, gameTime, panelRect);
+
+            Globals.DebugManager.Draw(_debugRenderer, gameTime);
         }
 
         Globals.SpriteBatch.End();
         base.Draw(gameTime);
     }
 
-    #endregion
 
-    #region === Graphics & Input Helpers ===
 
     private void SetupInitialGraphics()
     {
@@ -205,7 +191,5 @@ public class MonoFighterGame : Game
 
         return available;
     }
-
-    #endregion
 
 }
