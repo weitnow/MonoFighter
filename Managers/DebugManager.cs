@@ -1,3 +1,6 @@
+namespace MonoFighter.Debugging;
+
+
 public class DebugManager
 {
     public string PlayerState { get; set; } = "Idle";
