@@ -13,7 +13,7 @@ public class MonoFighterGame : Game
 
     private RenderTarget2D _gameRenderTarget;
     private SpriteFont _debugFont;
-    private OverlayRenderer _overlayRenderer;
+    private GbOverlayRenderer _overlayRenderer;
 
     private Texture2D _pixel;
 
@@ -45,7 +45,7 @@ public class MonoFighterGame : Game
         Globals.SpriteBatch = new SpriteBatch(GraphicsDevice);
 
         _debugFont = Globals.Content.Load<SpriteFont>("Fonts/DebugFont");
-        _overlayRenderer = new OverlayRenderer("Graphics/overlay", new Rectangle(145, 25, 209, 155));
+        _overlayRenderer = new GbOverlayRenderer("Graphics/overlay", new Rectangle(145, 25, 209, 155));
 
         // Reusable 1x1 white texture
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
