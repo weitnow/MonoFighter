@@ -16,9 +16,6 @@ public class MonoFighterGame : Game
     private RenderTarget2D _gameRenderTarget;
     private GbOverlayRenderer _overlayRenderer;
 
-    private DebugRenderer _debugRenderer;
-
-
     private int _currentResolutionIndex = 0;
 
     public MonoFighterGame()
@@ -44,7 +41,6 @@ public class MonoFighterGame : Game
         Globals.Content = Content;
         Globals.GraphicsDevice = GraphicsDevice;
         Globals.SpriteBatch = new SpriteBatch(GraphicsDevice);
-        Globals.DebugManager = new DebugManager();
 
         _overlayRenderer = new GbOverlayRenderer("Graphics/overlay", new Rectangle(145, 25, 209, 155)); // first two params x/y of the first top right pixel of the screen area, second two parameters with and height of the screen area
 
@@ -58,8 +54,7 @@ public class MonoFighterGame : Game
             0,
             RenderTargetUsage.DiscardContents);
 
-
-        _debugRenderer = new(); // need to be after Content and GraphicsDevice are set
+        Globals.DebugManager = new DebugManager(_gameRenderTarget);
 
         _gameManager.ChangeScene(new TestScene());
     }
@@ -67,7 +62,6 @@ public class MonoFighterGame : Game
     protected override void Update(GameTime gameTime)
     {
         HandleGlobalInput();
-
         Globals.Update(gameTime);
         InputManager.Update();
         _gameManager.Update(gameTime);
@@ -94,20 +88,9 @@ public class MonoFighterGame : Game
         }
         else
         {
-
             // === Debug mode layout ===
 
-            int halfWidth = Globals.WindowSize.X / 2;
-
-            float aspect = (float)_gameRenderTarget.Height / _gameRenderTarget.Width;
-            int gameViewHeight = (int)(halfWidth * aspect);
-
-            Rectangle gameViewRect = new(0, 0, halfWidth, gameViewHeight);
-            Globals.SpriteBatch.Draw(_gameRenderTarget, gameViewRect, Color.White);
-            _debugRenderer.DrawBoxes(gameViewRect, _gameRenderTarget);
-
-
-            Globals.DebugManager.Draw(_debugRenderer, gameTime);
+            Globals.DebugManager.Draw(gameTime); // draw the debug info panel on the right half
         }
 
         Globals.SpriteBatch.End();
@@ -164,27 +147,14 @@ public class MonoFighterGame : Game
 
     public List<Point> GetAvailableResolutions()
     {
-        // Get monitor's current max resolution
         var displayMode = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode;
         int maxWidth = displayMode.Width;
         int maxHeight = displayMode.Height;
 
         var available = new List<Point>();
 
-        foreach (Globals.ResolutionPreset preset in Enum.GetValues(typeof(Globals.ResolutionPreset)))
+        foreach (var res in Globals.ResolutionPresets.Values.Values)
         {
-            Point res = preset switch
-            {
-                Globals.ResolutionPreset.R_640x480 => new Point(640, 480),
-                Globals.ResolutionPreset.R_800x600 => new Point(800, 600),
-                Globals.ResolutionPreset.R_1280x720 => new Point(1280, 720),
-                Globals.ResolutionPreset.R_1920x1080 => new Point(1920, 1080),
-                Globals.ResolutionPreset.R_2560x1440 => new Point(2560, 1440),
-                Globals.ResolutionPreset.R_3440x1440 => new Point(3440, 1440),
-                Globals.ResolutionPreset.R_3840x2160 => new Point(3840, 2160),
-                _ => new Point(1920, 1080)
-            };
-
             if (res.X <= maxWidth && res.Y <= maxHeight)
                 available.Add(res);
         }

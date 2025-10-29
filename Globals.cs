@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Xna.Framework.Content;
+using System.Collections.Generic;
 
 using MonoFighter.Debugging;
 
@@ -28,17 +29,21 @@ public static class Globals
     {
         DeltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         TotalTime += DeltaTime;
+        DebugManager?.Update(gameTime);
     }
 
-    public enum ResolutionPreset
+    public static class ResolutionPresets
     {
-        R_640x480,
-        R_800x600,
-        R_1280x720,
-        R_1920x1080,
-        R_2560x1440,
-        R_3440x1440,
-        R_3840x2160
+        public static readonly Dictionary<string, Point> Values = new()
+        {
+            ["R_640x480"] = new Point(640, 480),
+            ["R_800x600"] = new Point(800, 600),
+            ["R_1280x720"] = new Point(1280, 720),
+            ["R_1920x1080"] = new Point(1920, 1080),
+            ["R_2560x1440"] = new Point(2560, 1440),
+            ["R_3440x1440"] = new Point(3440, 1440),
+            ["R_3840x2160"] = new Point(3840, 2160)
+        };
     }
 
 }
