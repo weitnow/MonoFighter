@@ -14,16 +14,16 @@ public class GbOverlayRenderer
         _transparentScreen = transparentScreen;
     }
 
-    public void Draw(SpriteBatch spriteBatch, RenderTarget2D gameRenderTarget)
+    public void Draw(RenderTarget2D gameRenderTarget)
     {
         var layout = CalculateLayout(Globals.WindowSize, new Point(_overlayTexture.Width, _overlayTexture.Height),
             _transparentScreen, Globals.VirtualResolution);
 
         // Draw game content
-        spriteBatch.Draw(gameRenderTarget, layout.GameDestRect, Color.White);
+        Globals.SpriteBatch.Draw(gameRenderTarget, layout.GameDestRect, Color.White);
 
         // Draw overlay (scaled and centered)
-        spriteBatch.Draw(_overlayTexture, layout.OverlayRect, Color.White);
+        Globals.SpriteBatch.Draw(_overlayTexture, layout.OverlayRect, Color.White);
     }
 
     private OverlayLayout CalculateLayout(Point windowSize, Point overlaySize, Rectangle transparentScreen, Point virtualResolution)

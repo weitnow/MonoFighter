@@ -33,7 +33,7 @@ public class DebugRenderer
         DrawRect(TransformRect(hurtBox, scaleX, scaleY, gameViewRect.Location), Color.Lime);
     }
 
-    public void DrawPanel(GameTime time)
+    public void DrawPanel()
     {
 
         // Draw semi-transparent background for the debug area
@@ -42,7 +42,7 @@ public class DebugRenderer
 
 
         Vector2 pos = new(panelRect.X + 20, 20);
-        float fps = (float)(1 / time.ElapsedGameTime.TotalSeconds);
+        float fps = (float)(1 / Globals.DeltaTime);
 
         Globals.SpriteBatch.DrawString(_font, $"FPS: {fps:0}", pos, Color.Yellow);
         pos.Y += 30;

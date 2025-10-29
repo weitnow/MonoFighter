@@ -84,13 +84,13 @@ public class MonoFighterGame : Game
         if (!Globals.DebugDraw)
         {
             // Normal mode — draw with overlay renderer
-            _overlayRenderer.Draw(Globals.SpriteBatch, _gameRenderTarget);
+            _overlayRenderer.Draw(_gameRenderTarget);
         }
         else
         {
-            // === Debug mode layout ===
+            // === Debug mode ===
 
-            Globals.DebugManager.Draw(gameTime); // draw the debug info panel on the right half
+            Globals.DebugManager.Draw(); // draw the debug info panel on the right half
         }
 
         Globals.SpriteBatch.End();

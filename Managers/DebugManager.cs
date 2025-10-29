@@ -45,13 +45,15 @@ public class DebugManager
 
     }
 
-    public void Draw(GameTime gameTime)
+    public void Draw()
     {
         // Draw game view on the left half
         Globals.SpriteBatch.Draw(_gameRenderTarget, _gameViewRect, Color.White);
 
-        _debugRenderer.DrawBoxes(_gameViewRect, _gameRenderTarget); // draw debug boxes over game view
+        // Draw debug boxes over game view
+        _debugRenderer.DrawBoxes(_gameViewRect, _gameRenderTarget);
 
-        _debugRenderer.DrawPanel(gameTime); // draw debug info panel on the right half
+        // Draw debug info panel on the right half
+        _debugRenderer.DrawPanel();
     }
 }
