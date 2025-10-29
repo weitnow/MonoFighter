@@ -26,6 +26,8 @@ public class TestScene : IScene
         _fighter.LoadFromAseprite("Graphics/nesFighter");
         _fighter.LoadFromAseprite("Graphics/debug32");
         _fighter.Play("gbFighter-Idle");
+
+        Globals.DebugManager.Add(_fighter);
     }
 
     public void Unload()

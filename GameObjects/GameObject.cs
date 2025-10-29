@@ -8,6 +8,8 @@ namespace MonoFighter;
 
 public class GameObject
 {
+
+    public bool IsActive { get; set; } = true;
     private Dictionary<string, AnimatedSprite> _animations; // all animations (assetName-tag)
     private AnimatedSprite _currentAnimation;
 
@@ -92,5 +94,17 @@ public class GameObject
     public void Draw(Vector2 position)
     {
         _currentAnimation?.Draw(Globals.SpriteBatch, position);
+    }
+
+    public string GetDebugInfo()
+    {
+        if (_currentAnimation != null)
+        {
+            return $"Current Animation: {_currentAnimation.Name}, Frame: {_currentAnimation.CurrentFrame}/{_currentAnimation.FrameCount}";
+        }
+        else
+        {
+            return "No animation playing.";
+        }
     }
 }
